@@ -724,9 +724,6 @@ namespace CoreIR {
 
 	      str += cArrayTypeDecl(*(in->getType()), " " + cVar(*in)) + ";\n";
 
-<<<<<<< HEAD
-=======
-
 	    } else {
 	      if (wd.isReceiver) {
 		//str += cArrayTypeDecl(*(in->getType()), " " + cVar(*in) + "_receiver") + ";\n";
@@ -736,7 +733,7 @@ namespace CoreIR {
 		//str += cArrayTypeDecl(*(in->getType()), " " + cVar(*in) + "_source") + ";\n";
 
 	      }
->>>>>>> cin_support
+
 	    }
 	  }
 	}
