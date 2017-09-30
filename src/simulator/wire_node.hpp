@@ -9,12 +9,13 @@ namespace CoreIR {
   class WireNode {
   protected:
     bool highBitsDirty;
-
     int threadNumber;
 
   public:
+
     CoreIR::Wireable* wire;
 
+  public:
     bool isSequential;
     bool isReceiver;
 
@@ -105,8 +106,8 @@ namespace CoreIR {
     return WireNode(wire, true, false);
   }
 
-  bool isGraphInput(const WireNode& w);
   bool isGraphOutput(const WireNode& w);
+  bool isGraphInput(const WireNode& w);
 
 }
 
