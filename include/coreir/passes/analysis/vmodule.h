@@ -25,32 +25,32 @@ class VWire {
   std::string name;
   unsigned dim;
   Type::DirKind dir;
-  public :
-    VWire(std::string field,Type* t) : name(field), dim(t->getSize()), dir(t->getDir()) {}
-    VWire(Wireable* w) : VWire("",w->getType()) {
-      SelectPath sp = w->getSelectPath();
-      if (sp.size()==3) {
-        ASSERT(dim==1 && !isNumber(sp[1]) && isNumber(sp[2]),"DEBUG ME:");
-        name = sp[1]+"["+sp[2]+"]";
-      }
-      else if (sp.size()==2) {
-        ASSERT(!isNumber(sp[1]),"DEBUG ME:");
-        name = sp[1];
-      }
-      else {
-        assert(0);
-      }
-      if (sp[0] != "self") {
-        name = sp[0]+ "_" + name;
-      }
+public :
+  VWire(std::string field,Type* t) : name(field), dim(t->getSize()), dir(t->getDir()) {}
+  VWire(Wireable* w) : VWire("",w->getType()) {
+    SelectPath sp = w->getSelectPath();
+    if (sp.size()==3) {
+      ASSERT(dim==1 && !isNumber(sp[1]) && isNumber(sp[2]),"DEBUG ME:");
+      name = sp[1]+"["+sp[2]+"]";
     }
-    VWire(std::string name, unsigned dim, Type::DirKind dir) : name(name), dim(dim), dir(dir) {}
-    std::string dimstr() {
-      if (dim==1) return "";
-      return "["+std::to_string(dim-1)+":0]";
+    else if (sp.size()==2) {
+      ASSERT(!isNumber(sp[1]),"DEBUG ME:");
+      name = sp[1];
     }
-    std::string dirstr() { return (dir==Type::DK_In) ? "input" : "output"; }
-    std::string getName() { return name;}
+    else {
+      assert(0);
+    }
+    if (sp[0] != "self") {
+      name = sp[0]+ "_" + name;
+    }
+  }
+  VWire(std::string name, unsigned dim, Type::DirKind dir) : name(name), dim(dim), dir(dir) {}
+  std::string dimstr() {
+    if (dim==1) return "";
+    return "["+std::to_string(dim-1)+":0]";
+  }
+  std::string dirstr() { return (dir==Type::DK_In) ? "input" : "output"; }
+  std::string getName() { return name;}
 };
 
 
@@ -109,6 +109,22 @@ class VModule {
         paramDefaults[dpair.first] = dpair.second->toString();
       }
     }
+
+  void removeParams(Params ps) { 
+    for (auto p : ps) {
+      ASSERT(params.count(p.first) == 1,"NYI Deleting a parameter that does not exist");
+      params.erase(p.first); 
+    }
+  }
+
+  void removeDefaults(Values ds) { 
+    for (auto dpair : ds) {
+      //ASSERT(params.count(dpair.first) == 1,"NYI Cannot Add default!");
+      //paramDefaults[dpair.first] = dpair.second->toString();
+      paramDefaults.erase(dpair.first);
+    }
+  }
+
 };
 
 }

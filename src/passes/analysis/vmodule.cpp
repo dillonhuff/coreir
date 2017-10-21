@@ -34,12 +34,14 @@ string VModule::toString() {
 string VModule::toInstanceString(Instance* inst) {
   string instname = inst->getInstname();
   Instantiable* iref = inst->getInstantiableRef();
+
   if (this->gen) {
     ASSERT(inst->isGen(),"DEBUG ME:");
     auto paramsAndDefaults = gen->getModParams(inst->getGenArgs());
     this->addParams(paramsAndDefaults.first);
     this->addDefaults(paramsAndDefaults.second);
   }
+
   ostringstream o;
   string tab = "  ";
   string mname;
@@ -85,7 +87,17 @@ string VModule::toInstanceString(Instance* inst) {
     string pstr = "."+port.first+"(" + instname+"_"+ port.first+")";
     portstrs.push_back(pstr);
   }
+
+  if (this->gen) {
+    ASSERT(inst->isGen(),"DEBUG ME:");
+    auto paramsAndDefaults = gen->getModParams(inst->getGenArgs());
+    this->removeParams(paramsAndDefaults.first);
+    this->removeDefaults(paramsAndDefaults.second);
+  }
+
   o << instname << "(\n" << tab << tab << join(portstrs.begin(),portstrs.end(),",\n"+tab+tab) << "\n  );" << endl;
+
+
   return o.str();
 }
 
