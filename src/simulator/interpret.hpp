@@ -1,6 +1,6 @@
 #pragma once
 
-#include "arena_allocator.h"
+//#include "arena_allocator.h"
 #include "coreir.h"
 #include "op_graph.hpp"
 
