@@ -206,6 +206,7 @@ namespace CoreIR {
       }
 
       assert(false);
+      return 0;
     }
 
     int numVertices() const;

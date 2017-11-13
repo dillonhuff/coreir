@@ -153,6 +153,7 @@ namespace CoreIR {
 
     cout << "ERROR: No type width for " << tp.toString() << endl;
     assert(false);
+    return 0;
   }
 
   uint containerTypeWidth(Type& tp) {
@@ -177,6 +178,7 @@ namespace CoreIR {
     }
 
     assert(false);
+    return 0;
   }
 
   bool standardWidth(Type& tp) {
@@ -238,6 +240,8 @@ namespace CoreIR {
 
     cout << "Could not find select with name = " << selName << endl;
     assert(false);
+
+    return nullptr;
   }
 
 }

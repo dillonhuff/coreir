@@ -11,10 +11,7 @@ namespace CoreIR {
   }
 
   void SimMemory::setAddr(const BitVec& bv, const BitVec& val) {
-    // cout << "bv.bitLength() = " << bv.bitLength() << endl;
-    // cout << "log2(depth))   = " << log2(depth) << endl;
 
-    //assert(bv.bitLength() == bitsToIndex(depth)); //log2(depth));
     assert(val.bitLength() == ((int) width));
     // Cannot access out of range elements
     assert(bv.to_type<uint>() < depth);
@@ -24,19 +21,13 @@ namespace CoreIR {
   }
 
   BitVec SimMemory::getAddr(const BitVec& bv) const {
-    // cout << "bv.bitLength() = " << bv.bitLength() << endl;
-    // cout << "log2(depth))   = " << log2(depth) << endl;
-
-    //assert(bv.bitLength() == bitsToIndex(depth)); //log2(depth));
 
     // Cannot access out of range elements
     assert(bv.to_type<uint>() < depth);
 
     auto it = values.find(bv);
-
     
     if (it == std::end(values)) {
-      //cout << "Could not find " << bv << endl;
       return BitVec(width, 0);
     }
 
@@ -85,6 +76,8 @@ namespace CoreIR {
   }
 
   SimBitVector* SimulatorState::makeSimBitVector(const BitVector& bv) {
+    //cout << "Size left = " << alloc.get_size_left() << endl;
+    //auto sbv  = new (alloc.allocate<SimBitVector>()) SimBitVector(bv);
     auto sbv  = new SimBitVector(bv);
     allocatedValues.insert(sbv);
 
@@ -118,7 +111,7 @@ namespace CoreIR {
 
         // Set memory state to default value
         LinebufferMemory freshMem(width, depth);
-        circStates[stateIndex].lbMemories.erase(inst->toString()); //, freshMem});
+        circStates[stateIndex].lbMemories.erase(inst->toString());
         circStates[stateIndex].lbMemories.insert({inst->toString(), freshMem});
 
         // Set memory output port to default
@@ -284,12 +277,7 @@ namespace CoreIR {
 
       return false;
 
-      // if (isSet(val)) {
-      //   if (getBitVec(val) == bv) {
-      //     return true;
-      //   }
-      // }
-      // return false;
+
     };
 
     stopConditions.push_back({val, func});
@@ -482,7 +470,7 @@ namespace CoreIR {
   }
 
   SimulatorState::SimulatorState(CoreIR::Module* mod_) :
-    mod(mod_), mainClock(nullptr) {
+    mod(mod_), mainClock(nullptr) { //, alloc() {
 
     hasSymTable = false;
 
@@ -506,7 +494,7 @@ namespace CoreIR {
 
     setConstantDefaults();
     setMemoryDefaults();
-    setLinebufferMemDefaults();
+    //setLinebufferMemDefaults();
     setRegisterDefaults();
     setDFFDefaults();
     setInputDefaults();
@@ -584,15 +572,22 @@ namespace CoreIR {
     return nullptr;
   }
 
+  BitVec SimulatorState::getBitVecBase(CoreIR::Select* sel) {
+    //return BitVector(16, 0);
+    SimValue* v = getValueBase(sel);
+
+    assert(v != nullptr);
+
+    return toSimBitVector(v)->getBits();
+  }
+
   BitVec SimulatorState::getBitVec(CoreIR::Select* sel) {
     SimValue* v = getValue(sel);
 
     assert(v != nullptr);
 
     return toSimBitVector(v)->getBits();
-    // assert(isSimBitVector(v));
 
-    // return static_cast<SimBitVector*>(v)->getBits();
   }
 
   SimValue* SimulatorState::getValue(CoreIR::Select* sel) {
@@ -608,6 +603,11 @@ namespace CoreIR {
       return makeSimBitVector(BitVec(1, (val->getBits()).get(index)));
     }
 
+    return getValueBase(sel);
+
+  }
+
+  SimValue* SimulatorState::getValueBase(CoreIR::Select* sel) {
     assert(mod->getDef()->hasSel(sel->toString()));
 
     auto it = circStates[stateIndex].valMap.find(sel);
@@ -711,6 +711,7 @@ namespace CoreIR {
 
   void SimulatorState::updateInputs(const vdisc vd) {
     auto inConns = getInputConnections(vd, gr);
+
     for (auto& conn : inConns) {
       Select* source = toSelect(conn.first.getWire());
       Select* dest = toSelect(conn.second.getWire());
@@ -726,11 +727,10 @@ namespace CoreIR {
     updateInputs(vd);
 
     WireNode wd = gr.getNode(vd);
-
     Instance* inst = toInstance(wd.getWire());
 
     auto outSelects = getOutputSelects(inst);
-    assert(outSelects.size() == 1);
+    // assert(outSelects.size() == 1);
 
     pair<string, Wireable*> outPair = *std::begin(outSelects);
 
@@ -738,14 +738,16 @@ namespace CoreIR {
     assert(inSels.size() == 2);
 
     Select* arg1 = toSelect(CoreIR::findSelect("in0", inSels));
-    BitVector bv1 = getBitVec(arg1); //s1->getBits();
+    BitVector bv1 = getBitVecBase(arg1);
     
     Select* arg2 = toSelect(CoreIR::findSelect("in1", inSels));
-    BitVector bv2 = getBitVec(arg2); //s2->getBits();
+    BitVector bv2 = getBitVecBase(arg2);
 
     BitVec res = op(bv1, bv2);
 
     setValue(toSelect(outPair.second), makeSimBitVector(res));
+
+    //setValue(toSelect(outPair.second), makeSimBitVector(BitVector(16, 0)));
   }
 
   void SimulatorState::updateAndNode(const vdisc vd) {
@@ -1285,7 +1287,7 @@ namespace CoreIR {
 
     Select* arg1 = toSelect(CoreIR::findSelect("in", inSels));
     SimBitVector* s1 =
-      static_cast<SimBitVector*>(getValue(arg1));
+      static_cast<SimBitVector*>(getValueBase(arg1));
 
     BitVector bv1(0);
     if (s1 != nullptr) {
@@ -1387,21 +1389,25 @@ namespace CoreIR {
       WireNode wd = gr.getNode(vd);
       if (isRegisterInstance(wd.getWire()) && wd.isReceiver) {
         updateRegisterValue(vd);
+        continue;
       }
 
       // TODO: Source-Sink split LinebufferMem's
       if (isLinebufferMemInstance(wd.getWire())) {
         updateLinebufferMemValue(vd);
+        continue;
       }
 
       if (isMemoryInstance(wd.getWire())) {
         if (wd.isReceiver) {
           updateMemoryValue(vd);
+          continue;
         }
       }
 
       if (isDFFInstance(wd.getWire()) && wd.isReceiver) {
         updateDFFValue(vd);
+        continue;
       }
       
     }

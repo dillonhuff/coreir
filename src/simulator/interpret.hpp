@@ -1,8 +1,8 @@
 #pragma once
 
+#include "arena_allocator.h"
 #include "coreir.h"
 #include "op_graph.hpp"
-
 
 namespace CoreIR {
 
@@ -167,6 +167,8 @@ namespace CoreIR {
 
     std::set<SimValue*> allocatedValues;
 
+    //arena_allocator alloc;
+
   public:
 
     SimulatorState(CoreIR::Module* mod_);
@@ -273,7 +275,9 @@ namespace CoreIR {
     SimValue* getValue(const std::string& name);
     SimValue* getValue(CoreIR::Select* sel);
     SimValue* getValue(const std::vector<std::string>& str);
+    SimValue* getValueBase(CoreIR::Select* sel);
 
+    BitVec getBitVecBase(CoreIR::Select* sel);
     BitVec getBitVec(CoreIR::Select* sel);
     BitVec getBitVec(const std::string& str);
     BitVec getBitVec(const std::vector<std::string>& str);

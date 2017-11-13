@@ -478,6 +478,7 @@ namespace CoreIR {
     cout << "Error: Could not find argument: " << argName << endl;
 
     assert(false);
+    return InstanceValue();
   }
 
   void setEdgeClean(const edisc ed,

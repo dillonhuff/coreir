@@ -133,6 +133,7 @@ namespace CoreIR {
     }
     
     assert(false);
+    return "";
 
   }
 
@@ -158,6 +159,7 @@ namespace CoreIR {
     }
     
     assert(false);
+    return "";
   }
 
   string lastMask(const uint startWidth, const uint endWidth) {
@@ -201,6 +203,7 @@ namespace CoreIR {
     }
 
     assert(false);
+    return "";
 
   }
 
@@ -253,6 +256,7 @@ namespace CoreIR {
     cout << "ERROR: Unsupported type = " << t.toString() << endl;    
 
     assert(false);
+    return "";
 
   }
   
