@@ -573,12 +573,12 @@ namespace CoreIR {
   }
 
   BitVec SimulatorState::getBitVecBase(CoreIR::Select* sel) {
-    //return BitVector(16, 0);
-    SimValue* v = getValueBase(sel);
+    return BitVector(16, 0);
+    // SimValue* v = getValueBase(sel);
 
-    assert(v != nullptr);
+    // assert(v != nullptr);
 
-    return toSimBitVector(v)->getBits();
+    // return toSimBitVector(v)->getBits();
   }
 
   BitVec SimulatorState::getBitVec(CoreIR::Select* sel) {
